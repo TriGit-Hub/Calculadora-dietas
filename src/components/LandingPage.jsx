@@ -1,4 +1,11 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, lazy, Suspense, Component } from 'react'
+const VegetableScene = lazy(() => import('./VegetableScene'))
+
+class VegErrorBoundary extends Component {
+  state = { err: false }
+  static getDerivedStateFromError() { return { err: true } }
+  render() { return this.state.err ? null : this.props.children }
+}
 import {
   motion,
   useScroll,
@@ -396,6 +403,13 @@ export default function LandingPage({ onStart }) {
           />
         </div>
 
+        {/* 3D vegetable models — lazy loaded, WebGL optional */}
+        <VegErrorBoundary>
+          <Suspense fallback={null}>
+            <VegetableScene />
+          </Suspense>
+        </VegErrorBoundary>
+
         <motion.div style={{ y: heroY, opacity: heroOpacity }} className="relative z-10 w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
           {/* Left — text */}
           <motion.div initial="hidden" animate="visible" variants={stagger}>
@@ -706,7 +720,7 @@ function MenuPreviewSection({ onStart }) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
   const [activeDay, setActiveDay] = useState(0)
-  const [mode, setMode] = useState('intercambios') // 'intercambios' | 'recetas'
+  const [mode, setMode] = useState('recetas') // 'recetas' | 'intercambios'
 
   const day = PREVIEW_DAYS[activeDay]
   const meals = day.meals
